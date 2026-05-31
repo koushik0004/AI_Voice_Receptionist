@@ -1,12 +1,16 @@
 SHELL := /bin/sh
 
+ifneq (,$(wildcard .env))
+include .env
+endif
+
 PYTHON ?= python3
 VENV_DIR ?= .venv
 VENV_PY := $(VENV_DIR)/bin/python
 VENV_PIP := $(VENV_DIR)/bin/pip
 
 HOST ?= 127.0.0.1
-PORT ?= 8000
+PORT ?= 4001
 APP_MODULE ?= app.main:app
 
 .PHONY: help setup install install-dev run dev test health clean shell
@@ -15,8 +19,8 @@ help: ## Show available commands
 	@printf "\nAvailable targets:\n"
 	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@printf "\nCommon overrides:\n"
-	@printf "  make dev PORT=8001\n"
-	@printf "  make run HOST=0.0.0.0 PORT=8000\n"
+	@printf "  make dev PORT=4001\n"
+	@printf "  make run HOST=0.0.0.0 PORT=4001\n"
 	@printf "  make setup PYTHON=python3.11\n\n"
 
 $(VENV_PY):
