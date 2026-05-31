@@ -4,7 +4,8 @@ ifneq (,$(wildcard .env))
 include .env
 endif
 
-PYTHON ?= python3
+DEFAULT_PYTHON := $(shell if command -v python3.13 >/dev/null 2>&1; then echo python3.13; elif command -v python3.12 >/dev/null 2>&1; then echo python3.12; elif command -v python3.11 >/dev/null 2>&1; then echo python3.11; else echo python3; fi)
+PYTHON ?= $(DEFAULT_PYTHON)
 VENV_DIR ?= .venv
 VENV_PY := $(VENV_DIR)/bin/python
 VENV_PIP := $(VENV_DIR)/bin/pip
@@ -21,18 +22,25 @@ help: ## Show available commands
 	@printf "\nCommon overrides:\n"
 	@printf "  make dev PORT=4001\n"
 	@printf "  make run HOST=0.0.0.0 PORT=4001\n"
-	@printf "  make setup PYTHON=python3.11\n\n"
+	@printf "  make setup\n"
+	@printf "  make setup PYTHON=python3.13\n\n"
+
+check-python: ## Verify that the selected Python interpreter is supported
+	@$(PYTHON) -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' || \
+		{ printf "\nError: %s is %s, but this project requires Python >= 3.11.\n" "$$(command -v $(PYTHON) || printf $(PYTHON))" "$$($(PYTHON) --version 2>&1)"; \
+		  printf "Use a Python 3.11+ interpreter, for example:\n  make setup PYTHON=python3.13\n\n"; \
+		  exit 1; }
 
 $(VENV_PY):
 	$(PYTHON) -m venv $(VENV_DIR)
 
-setup: $(VENV_PY) install-dev ## Create the virtualenv and install dev dependencies
+setup: check-python $(VENV_PY) install-dev ## Create the virtualenv and install dev dependencies
 
-install: $(VENV_PY) ## Install runtime dependencies into the virtualenv
+install: check-python $(VENV_PY) ## Install runtime dependencies into the virtualenv
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install -e .
 
-install-dev: $(VENV_PY) ## Install runtime and development dependencies
+install-dev: check-python $(VENV_PY) ## Install runtime and development dependencies
 	$(VENV_PIP) install --upgrade pip
 	$(VENV_PIP) install -e ".[dev]"
 

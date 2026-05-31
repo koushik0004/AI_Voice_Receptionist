@@ -20,18 +20,106 @@ The goal is not a full voice platform yet. This codebase starts with determinist
 - LLM: small fast model port, deterministic local router now
 - Follow-up: WhatsApp provider port, local adapter now
 
-## Run Locally
+## New User Onboarding
+
+### 1. Prerequisites
+
+- Python `3.11` or newer
+- `make`
+
+The setup flow will automatically prefer `python3.13`, then `python3.12`, then `python3.11`.
+
+If you want to confirm what is installed locally:
+
+```bash
+python3.13 --version
+python3.12 --version
+python3.11 --version
+make --version
+```
+
+### 2. Move Into The Project
+
+```bash
+cd ai-voice-receptionist-mvp
+```
+
+### 3. Create The Virtual Environment And Install Dependencies
+
+Run the project setup:
 
 ```bash
 make setup
+```
+
+This command will:
+
+- check that the selected Python version is supported
+- create a local virtual environment in `.venv`
+- install the project and development dependencies
+
+If you want to force a specific interpreter, use:
+
+```bash
+make setup PYTHON=python3.13
+```
+
+### 4. Review Local Configuration
+
+The repository includes a project-level `.env` file with local defaults for:
+
+- host
+- port
+- app module
+- virtual environment path
+- application metadata
+
+Default local runtime values:
+
+- `HOST=127.0.0.1`
+- `PORT=4001`
+- `APP_MODULE=app.main:app`
+
+If needed, edit `.env` before starting the server. You can also add `PYTHON=python3.13` there if you want to always use a specific interpreter.
+
+### 5. Start The Server
+
+For local development with auto-reload:
+
+```bash
 make dev
 ```
 
-Health check:
+For a normal server run without auto-reload:
+
+```bash
+make run
+```
+
+Useful examples:
+
+```bash
+make dev PORT=4001
+make run HOST=0.0.0.0 PORT=4001
+```
+
+### 6. Verify The Server Is Running
+
+You can use the built-in health command:
+
+```bash
+make health
+```
+
+Or call the endpoint directly:
 
 ```bash
 curl http://127.0.0.1:4001/health
 ```
+
+### 7. Run Basic Local API Checks
+
+Once the server is running, you can test the local flows below.
 
 Simulate an inbound call:
 
@@ -67,13 +155,14 @@ The repository now includes a project-level `.env` file with the local setup def
 
 It also carries the shared setup/runtime values used by the Makefile and application metadata:
 
-- `PYTHON=python3`
 - `VENV_DIR=.venv`
 - `APP_TITLE=AI Voice Receptionist MVP`
 - `APP_VERSION=0.1.0`
 - `APP_DESCRIPTION=Lean workflow foundation for missed calls, bookings, FAQ, transfer, and WhatsApp follow-up.`
 - `ENVIRONMENT=local`
 - `LOG_LEVEL=info`
+
+If needed, you can add `PYTHON=python3.13` to `.env` to force a specific interpreter.
 
 If you want to change the default local host, port, or app module, edit `.env` and rerun `make dev`.
 
